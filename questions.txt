@@ -1,0 +1,162 @@
+0.  Pneumonoultramicroscopicsilicovolcanoconiosis is a word that refers to a lung 
+disease that is otherwise known as silicosis. It is the longest word in the 
+English language published in a dictionary.
+
+1.  int getrusage (int who, struct rusage *usage);
+Getrusage returns resource usage measures for a given process (or processes)
+designated by "who". The resource usages are returned in the structure pointed
+to by usage.
+
+2.  The structure in which the resource usages are returned has the following
+form :
+struct rusage {
+    struct timeval ru_utime; /* user CPU time used */
+    struct timeval ru_stime; /* system CPU time used */
+    long   ru_maxrss;        /* maximum resident set size */
+    long   ru_ixrss;         /* integral shared memory size */
+    long   ru_idrss;         /* integral unshared data size */
+    long   ru_isrss;         /* integral unshared stack size */
+    long   ru_minflt;        /* page reclaims (soft page faults) */
+    long   ru_majflt;        /* page faults (hard page faults) */
+    long   ru_nswap;         /* swaps */
+    long   ru_inblock;       /* block input operations */
+    long   ru_oublock;       /* block output operations */
+    long   ru_msgsnd;        /* IPC messages sent */
+    long   ru_msgrcv;        /* IPC messages received */
+    long   ru_nsignals;      /* signals received */
+    long   ru_nvcsw;         /* voluntary context switches */
+    long   ru_nivcsw;        /* involuntary context switches */
+};
+It has 16 members.
+
+3.  Before and after are passed by reference (instead of by value) 
+to calculate because first, we can then check if they are NULL. But most of all
+because it is better optimized: if they are passed by value, then a copy of 
+before and after are passed, which takes up more memory. Passing them by
+reference allows us to re-use before and after multiple times by changing their
+addresses, thus only taking up 2 variables in the stack.
+
+4.  After loading the dictionary and opening the text, the program uses the 
+function getc() to spell-check the text one character at a time. The first part 
+of the loop checks whether the character is alphabetical. If there is an apostrophe, 
+then it is appended to the word and the cursor within the word (called «index»)
+is incremented. Then, if a word is longer than the maximum set in «dictionary.h»,
+it is ignored («index» is ressetted to 0).
+
+Second case, if a character is a digit, then the «word» that contains it is ignored.
+
+Then the loop tackles the word counter. Whenever getc() reaches the termination 
+character, the words counter is incremented and the word’s spelling is then checked 
+and the benchmark is updated.
+
+If a word is misspelled, then it is printed and the misspellings words counter is 
+incremented.
+
+If there was an error, then the program closes the files.
+
+Then the text file is closed.
+
+The size of the dictionary is determined and then the dictionary is unloaded.
+
+At the end, the program prints out a report of the words misspelled, the words in 
+dictionary and text as well as all the timing previously calculated (load, check,
+size, unload).
+
+5.  Fetgetc() is a better function to examine the file one character at a time
+since it allows the program to easily determine if the character is alphanumerical,
+if it is an apostrophe, if it has reached a termination character (this is how
+we know that it is the end of a word).
+On the other hand, fscanf cannot discriminate in a efficient way if the character
+is an apostrophe, a digit, and also has issues dealing with white space (white
+space characters in the format string match any amount of whitespace, even non at
+all). We would have to specify multiple cases.
+
+6.  The const type ensures that the initial value of the parameter can't be modified. 
+This means that each word of the dictionary that is loaded can't be changed, and
+everytime a word is checked against the dictionary it can't be changed either. 
+This safety measure is useful as these values should be consistent and are not 
+meant to be changed.
+
+7. I chose to implement my spell checker with tries. Every node contains an array
+of node pointers (one for letter in the alphabet, plus one for the apostrophe).
+Each element in the array points to another node (if the node is NULL, then that letter
+isn't the next letter of any of any words in that sequence). Every node indicates
+whether it's the last character of a word. Although tries take up a lot of 
+memory and can be more complicated to implement, it allows the program to check
+if a word is in a dictionary (serach) very quickly.
+
+8.  ./speller texts/austinpowers.txt
+
+MISSPELLED WORDS
+
+BEATLE
+Carnaby
+s
+Baaden
+Garfields
+M
+Gilmour
+Heffner's
+Chigro
+colored'
+Orgy'
+Virtucon
+Caesar's
+reanimation
+Mustafa's
+emdash
+Farbissina
+Um
+Kreplachistan
+INT
+Underthings
+Hai
+X
+Alotta
+TEXAN'S
+Virtucon
+INT
+Power's
+VO
+POV
+ALOTTA
+SERGIO
+INT
+FEMBOTS
+Kreplachistan
+Virtucon
+BACHARACH'S
+INT
+VIRTUCON
+scientists'
+Evil's
+minivan
+INT
+Farbissina
+FARBISSINA
+FEMBOT
+emdash
+VIRTUCON
+COUN
+Alotta
+emdash
+VO
+VO
+VO
+AUSITN
+VO
+
+WORDS MISSPELLED:     644
+WORDS IN DICTIONARY:  143092
+WORDS IN TEXT:        19190
+TIME IN load:         0.14
+TIME IN check:        0.01
+TIME IN size:         0.00
+TIME IN unload:       0.06
+TIME IN TOTAL:        0.22
+
+9.  I did not make any changes because the results were quite fast aready.
+
+10. I think that the fact that I'm reading the dictionary character by character
+is not the most optimal way of implementing the function load since it takes time.
+It would have been better to read it word by word.
